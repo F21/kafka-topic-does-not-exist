@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  test:
+    image: golang:1.18
+    command: >
+      sh -c "go run main.go"
+    environment:
+      KAFKA_BROKER_ADDRS: kafka1:9092,kafka2:9092,kafka3:9092
+    working_dir: /source
+    volumes:
+      - .:/source
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+
+  zookeeper:
+    image: zookeeper:3.7
+
+  kafka1:
+    image: bitnami/kafka:3.1.0
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  kafka2:
+    image: bitnami/kafka:3.1.0
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_BROKER_ID=2
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  kafka3:
+    image: bitnami/kafka:3.1.0
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_BROKER_ID=3
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+    depends_on:
+      - zookeeper
